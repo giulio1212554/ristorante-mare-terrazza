@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard tavoli – Mare&Terrazza</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="page">
+    <header class="nav">
+        <div class="nav-logo">
+            MARE<span>&</span>TERRAZZA
+        </div>
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/logout">Esci</a>
+        </nav>
+    </header>
+
+    <section class="section">
+        <h2>Dashboard tavoli – {{ today }}</h2>
+        <p>Panoramica delle prenotazioni della serata, con tavoli occupati e liberi.</p>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>Stato tavoli</h3>
+                <div class="stats-row">
+                    <div class="stat-pill">
+                        <span>Tavoli totali</span>
+                        <strong>{{ total_tables }}</strong>
+                    </div>
+                    <div class="stat-pill">
+                        <span>Prenotati</span>
+                        <strong>{{ booked_tables }}</strong>
+                    </div>
+                    <div class="stat-pill">
+                        <span>Liberi</span>
+                        <strong>{{ free_tables }}</strong>
+                    </div>
+                </div>
+
+                <div style="margin-top:16px;">
+                    <canvas id="reservationsChart" height="160"></canvas>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Ora</th>
+                            <th>N persone</th>
+                            <th>Età</th>
+                            <th>Antipasto</th>
+                            <th>Area</th>
+                            <th>Acqua</th>
+                            <th>Tavolo</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for r in reservations %}
+                        <tr>
+                            <td>{{ r.time }}</td>
+                            <td>{{ r.people }}</td>
+                            <td>{{ r.age_group }}</td>
+                            <td>{{ r.antipasto }}</td>
+                            <td><span class="badge badge-area">{{ r.area }}</span></td>
+                            <td><span class="badge badge-water">{{ r.water }}</span></td>
+                            <td>{{ r.table_number }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Mappa tavoli</h3>
+                <p style="font-size:13px; color:#9ca3af;">
+                    Ogni tavolo è rappresentato come una cella: verde = libero, rosso = prenotato.
+                </p>
+                <div class="table-map">
+                    {% for t in table_map %}
+                    <div class="table-cell {{ t.status }}">
+                        Tavolo {{ t.number }}<br>
+                        {% if t.status == 'booked' %}
+                            Prenotato
+                        {% else %}
+                            Libero
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    const labels = {{ chart_labels|tojson }};
+    const values = {{ chart_values|tojson }};
+
+    const ctx = document.getElementById('reservationsChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels.map(h => h + ":00"),
+            datasets: [{
+                label: 'Prenotazioni per ora',
+                data: values,
+                backgroundColor: '#22c55e',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    ticks: { color: '#9ca3af' },
+                    grid: { display: false }
+                },
+                y: {
+                    ticks: { color: '#9ca3af' },
+                    grid: { color: 'rgba(31,41,55,0.6)' }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: { color: '#e5e7eb' }
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

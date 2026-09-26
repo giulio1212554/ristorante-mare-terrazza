@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Prenota – Persone</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="page">
+    <header class="nav">
+        <div class="nav-logo">
+            MARE<span>&</span>TERRAZZA
+        </div>
+        <nav class="nav-links">
+            <a href="/">Home</a>
+        </nav>
+    </header>
+
+    <section class="section">
+        <h2>Quante persone?</h2>
+        <form method="POST">
+            <input type="number" name="people" min="1" required style="padding:8px; border-radius:8px; border:none;">
+            <br><br>
+            <button type="submit" class="btn btn-primary">Avanti</button>
+        </form>
+    </section>
+</div>
+</body>
+</html>

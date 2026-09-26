@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Prenota – Età</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="page">
+    <header class="nav">
+        <div class="nav-logo">
+            MARE<span>&</span>TERRAZZA
+        </div>
+        <nav class="nav-links">
+            <a href="/">Home</a>
+        </nav>
+    </header>
+
+    <section class="section">
+        <h2>Fascia d'età</h2>
+        <form method="POST">
+            <select name="age_group" required style="padding:8px; border-radius:8px; border:none;">
+                <option value="bambini">0–12 (menù bambini)</option>
+                <option value="adulti">12+ (menù adulti)</option>
+            </select>
+            <br><br>
+            <button type="submit" class="btn btn-primary">Avanti</button>
+        </form>
+    </section>
+</div>
+</body>
+</html>

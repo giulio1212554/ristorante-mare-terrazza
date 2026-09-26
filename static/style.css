@@ -1,0 +1,370 @@
+:root {
+    --bg: #020617;
+    --bg-soft: #0f172a;
+    --accent: #22c55e;
+    --accent-soft: rgba(34, 197, 94, 0.15);
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --danger: #ef4444;
+    --booked: #ef4444;
+    --free: #22c55e;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+}
+
+body {
+    background: radial-gradient(circle at top, #1e293b 0, #020617 45%);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+.page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.nav-logo {
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    font-size: 18px;
+    text-transform: uppercase;
+}
+
+.nav-logo span {
+    color: var(--accent);
+}
+
+.nav-links {
+    display: flex;
+    gap: 16px;
+    font-size: 14px;
+}
+
+.nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 999px;
+    transition: 0.2s;
+}
+
+.nav-links a:hover {
+    color: var(--text);
+    background: rgba(148, 163, 184, 0.15);
+}
+
+.hero {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 32px;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.hero-main h1 {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.hero-main p {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    border: none;
+    cursor: pointer;
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: #022c22;
+    box-shadow: 0 12px 30px rgba(34, 197, 94, 0.35);
+}
+
+.btn-primary:hover {
+    background: #16a34a;
+}
+
+.btn-ghost {
+    background: rgba(15, 23, 42, 0.8);
+    color: var(--text);
+    border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.btn-ghost:hover {
+    background: rgba(30, 64, 175, 0.35);
+    border-color: rgba(59, 130, 246, 0.7);
+}
+
+.hero-card {
+    background: linear-gradient(145deg, #0b1120, #020617);
+    border-radius: 18px;
+    padding: 18px 18px 16px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.9);
+}
+
+.hero-card h3 {
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.hero-card p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 12px;
+}
+
+.hero-card-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.section {
+    margin-bottom: 32px;
+}
+
+.section h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.section p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 12px;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.menu-card {
+    background: var(--bg-soft);
+    border-radius: 14px;
+    padding: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.menu-card h3 {
+    font-size: 15px;
+    margin-bottom: 6px;
+}
+
+.menu-card p {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.menu-tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.12);
+    color: var(--accent);
+    margin-bottom: 6px;
+}
+
+/* SEARCH */
+
+.search-wrapper {
+    max-width: 520px;
+    margin: 40px auto 0;
+}
+
+.search-label {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 8px;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    background: var(--bg-soft);
+    border-radius: 999px;
+    padding: 6px 10px;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+}
+
+.search-bar input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 14px;
+    padding: 6px 8px;
+}
+
+.search-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    margin-right: 4px;
+}
+
+.search-bar button {
+    border: none;
+    background: var(--accent);
+    color: #022c22;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(34, 197, 94, 0.35);
+}
+
+/* DASHBOARD */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.card {
+    background: var(--bg-soft);
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.card h3 {
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+
+.stats-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.stat-pill {
+    flex: 1;
+    background: rgba(15, 23, 42, 0.9);
+    border-radius: 12px;
+    padding: 10px;
+    font-size: 12px;
+}
+
+.stat-pill span {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.stat-pill strong {
+    font-size: 16px;
+}
+
+.table-wrapper {
+    margin-top: 12px;
+    max-height: 320px;
+    overflow: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.table th,
+.table td {
+    padding: 8px;
+    border-bottom: 1px solid rgba(31, 41, 55, 0.8);
+    text-align: left;
+}
+
+.table th {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 999px;
+}
+
+.badge-area {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+}
+
+.badge-water {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--accent);
+}
+
+/* MAPPA TAVOLI */
+
+.table-map {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(60px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.table-cell {
+    border-radius: 10px;
+    padding: 10px 6px;
+    text-align: center;
+    font-size: 12px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.table-cell.free {
+    border-color: var(--free);
+    color: var(--free);
+}
+
+.table-cell.booked {
+    border-color: var(--booked);
+    color: var(--booked);
+}
