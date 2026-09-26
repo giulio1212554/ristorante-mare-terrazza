@@ -53,6 +53,9 @@ def cleanup_old():
 @app.route('/')
 def index():
     return render_template('index.html')
+@app.route("/menu")
+def menu():
+    return render_template("menu.html")
 
 # -----------------------------
 # PAGINA CERCA (CODICE)
@@ -167,7 +170,12 @@ def prenota_step4():
         session['table_number'] = table_number
 
         return redirect(url_for('prenota_step5'))
-    return render_template('prenota_step4.html', total_tables=TOTAL_TABLES)
+    return render_template("prenota_step4.html", day=day, time=time, people=people, age_group=age_group, antipasto=antipasto, occupied_tables=occupied_tables)
+
+# Recupera i tavoli già prenotati per quel giorno e ora
+c.execute("SELECT table_number FROM reservations WHERE day=? AND time=?", (day, time))
+occupied_tables = [row[0] for row in c.fetchall()]
+ render_template('prenota_step4.html', total_tables=TOTAL_TABLES)
 
 # -----------------------------
 # STEP 5: acqua
