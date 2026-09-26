@@ -1,223 +1,170 @@
-from flask import Flask, render_template, request, redirect, url_for, session
-from datetime import datetime, date
+from flask import Flask, render_template, request, redirect
 import sqlite3
 import os
 
 app = Flask(__name__)
-app.secret_key = "super_secret_key"
 
-DB_PATH = "reservations.db"
-ADMIN_CODE = "x2100gh"  # codice accesso area riservata
-
-TOTAL_TABLES = 20  # numero tavoli totali
-
-# -----------------------------
-# DB SETUP
-# -----------------------------
+# ---------------------------
+# DATABASE INIT
+# ---------------------------
 def init_db():
-    if not os.path.exists(DB_PATH):
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        c.execute("""
-        CREATE TABLE reservations (
+    conn = sqlite3.connect("reservations.db")
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS reservations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             day TEXT,
             time TEXT,
             people INTEGER,
             age_group TEXT,
             antipasto TEXT,
-            area TEXT,
-            water TEXT,
-            table_number INTEGER
+            table_number INTEGER,
+            name TEXT,
+            phone TEXT
         )
-        """)
-        conn.commit()
-        conn.close()
-
-def get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-def cleanup_old():
-    conn = get_db()
-    c = conn.cursor()
-    today = date.today().isoformat()
-    c.execute("DELETE FROM reservations WHERE day < ?", (today,))
+    """)
     conn.commit()
     conn.close()
 
-# -----------------------------
-# HOME – FACCIATA
-# -----------------------------
-@app.route('/')
+init_db()
+
+# ---------------------------
+# HOME
+# ---------------------------
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
+
+# ---------------------------
+# MENU PAGE
+# ---------------------------
 @app.route("/menu")
 def menu():
     return render_template("menu.html")
 
-# -----------------------------
-# PAGINA CERCA (CODICE)
-# -----------------------------
-@app.route('/search', methods=['GET', 'POST'])
+# ---------------------------
+# SEARCH (AREA RISERVATA)
+# ---------------------------
+@app.route("/search", methods=["GET", "POST"])
 def search():
-    if request.method == 'POST':
-        code = request.form.get('code')
-        if code == ADMIN_CODE:
-            session['admin'] = True
-            return redirect(url_for('dashboard'))
+    if request.method == "POST":
+        code = request.form.get("code")
+        if code == "x2100gh":
+            conn = sqlite3.connect("reservations.db")
+            c = conn.cursor()
+            c.execute("SELECT * FROM reservations ORDER BY id DESC")
+            data = c.fetchall()
+            conn.close()
+            return render_template("dashboard.html", data=data)
         else:
-            return "Codice non valido"
-    return render_template('search.html')
+            return render_template("search.html", error="Codice errato")
+    return render_template("search.html")
 
-# -----------------------------
-# DASHBOARD
-# -----------------------------
-@app.route('/dashboard')
-def dashboard():
-    if not session.get('admin'):
-        return redirect(url_for('search'))
+# ---------------------------
+# PRENOTAZIONE STEP 1
+# ---------------------------
+@app.route("/prenota/step1")
+def prenota_step1():
+    return render_template("prenota_step1.html")
 
-    cleanup_old()
+# ---------------------------
+# PRENOTAZIONE STEP 2
+# ---------------------------
+@app.route("/prenota/step2", methods=["POST"])
+def prenota_step2():
+    day = request.form.get("day")
+    return render_template("prenota_step2.html", day=day)
 
-    conn = get_db()
+# ---------------------------
+# PRENOTAZIONE STEP 3
+# ---------------------------
+@app.route("/prenota/step3", methods=["POST"])
+def prenota_step3():
+    day = request.form.get("day")
+    time = request.form.get("time")
+    return render_template("prenota_step3.html", day=day, time=time)
+
+# ---------------------------
+# PRENOTAZIONE STEP 4 (TAVOLI)
+# ---------------------------
+@app.route("/prenota/step4", methods=["POST"])
+def prenota_step4():
+    day = request.form.get("day")
+    time = request.form.get("time")
+    people = request.form.get("people")
+    age_group = request.form.get("age_group")
+    antipasto = request.form.get("antipasto")
+
+    conn = sqlite3.connect("reservations.db")
     c = conn.cursor()
-    today = date.today().isoformat()
-    c.execute("SELECT * FROM reservations WHERE day = ?", (today,))
-    rows = c.fetchall()
+
+    # Tavoli occupati per quel giorno e ora
+    c.execute("SELECT table_number FROM reservations WHERE day=? AND time=?", (day, time))
+    occupied_tables = [row[0] for row in c.fetchall()]
+
     conn.close()
 
-    booked_tables = len(rows)
-    free_tables = max(TOTAL_TABLES - booked_tables, 0)
-
-    # dati per grafico: prenotazioni per fascia oraria
-    time_buckets = {}
-    for r in rows:
-        t = r["time"][:2]  # ora (HH)
-        time_buckets[t] = time_buckets.get(t, 0) + 1
-
-    chart_labels = sorted(time_buckets.keys())
-    chart_values = [time_buckets[h] for h in chart_labels]
-
-    # mappa tavoli: lista da 1 a TOTAL_TABLES con stato
-    table_map = []
-    booked_numbers = {r["table_number"] for r in rows}
-    for n in range(1, TOTAL_TABLES + 1):
-        table_map.append({
-            "number": n,
-            "status": "booked" if n in booked_numbers else "free"
-        })
-
     return render_template(
-        'dashboard.html',
-        reservations=rows,
-        total_tables=TOTAL_TABLES,
-        booked_tables=booked_tables,
-        free_tables=free_tables,
-        today=today,
-        chart_labels=chart_labels,
-        chart_values=chart_values,
-        table_map=table_map
+        "prenota_step4.html",
+        day=day,
+        time=time,
+        people=people,
+        age_group=age_group,
+        antipasto=antipasto,
+        occupied_tables=occupied_tables
     )
 
-# -----------------------------
-# PRENOTAZIONE – STEP 1: persone
-# -----------------------------
-@app.route('/prenota/step1', methods=['GET', 'POST'])
-def prenota_step1():
-    if request.method == 'POST':
-        session['people'] = int(request.form.get('people'))
-        return redirect(url_for('prenota_step2'))
-    return render_template('prenota_step1.html')
-
-# -----------------------------
-# STEP 2: età
-# -----------------------------
-@app.route('/prenota/step2', methods=['GET', 'POST'])
-def prenota_step2():
-    if request.method == 'POST':
-        age_group = request.form.get('age_group')
-        session['age_group'] = age_group
-        return redirect(url_for('prenota_step3'))
-    return render_template('prenota_step2.html')
-
-# -----------------------------
-# STEP 3: antipasto
-# -----------------------------
-@app.route('/prenota/step3', methods=['GET', 'POST'])
-def prenota_step3():
-    if request.method == 'POST':
-        antipasto = request.form.get('antipasto')
-        session['antipasto'] = antipasto
-        return redirect(url_for('prenota_step4'))
-    return render_template('prenota_step3.html')
-
-# -----------------------------
-# STEP 4: data, ora, posizione, tavolo
-# -----------------------------
-@app.route('/prenota/step4', methods=['GET', 'POST'])
-def prenota_step4():
-    if request.method == 'POST':
-        day = request.form.get('day')
-        time = request.form.get('time')
-        area = request.form.get('area')
-        table_number = int(request.form.get('table_number'))
-
-        session['day'] = day
-        session['time'] = time
-        session['area'] = area
-        session['table_number'] = table_number
-
-        return redirect(url_for('prenota_step5'))
-    return render_template("prenota_step4.html", day=day, time=time, people=people, age_group=age_group, antipasto=antipasto, occupied_tables=occupied_tables)
-
-# Recupera i tavoli già prenotati per quel giorno e ora
-c.execute("SELECT table_number FROM reservations WHERE day=? AND time=?", (day, time))
-occupied_tables = [row[0] for row in c.fetchall()]
- render_template('prenota_step4.html', total_tables=TOTAL_TABLES)
-
-# -----------------------------
-# STEP 5: acqua
-# -----------------------------
-@app.route('/prenota/step5', methods=['GET', 'POST'])
+# ---------------------------
+# PRENOTAZIONE STEP 5 (DATI FINALI)
+# ---------------------------
+@app.route("/prenota/step5", methods=["POST"])
 def prenota_step5():
-    if request.method == 'POST':
-        water = request.form.get('water')
-        session['water'] = water
+    day = request.form.get("day")
+    time = request.form.get("time")
+    people = request.form.get("people")
+    age_group = request.form.get("age_group")
+    antipasto = request.form.get("antipasto")
+    table_number = request.form.get("table_number")
 
-        conn = get_db()
-        c = conn.cursor()
-        c.execute("""
-        INSERT INTO reservations (day, time, people, age_group, antipasto, area, water, table_number)
+    return render_template(
+        "prenota_step5.html",
+        day=day,
+        time=time,
+        people=people,
+        age_group=age_group,
+        antipasto=antipasto,
+        table_number=table_number
+    )
+
+# ---------------------------
+# SALVATAGGIO PRENOTAZIONE
+# ---------------------------
+@app.route("/prenota/complete", methods=["POST"])
+def prenota_complete():
+    day = request.form.get("day")
+    time = request.form.get("time")
+    people = request.form.get("people")
+    age_group = request.form.get("age_group")
+    antipasto = request.form.get("antipasto")
+    table_number = request.form.get("table_number")
+    name = request.form.get("name")
+    phone = request.form.get("phone")
+
+    conn = sqlite3.connect("reservations.db")
+    c = conn.cursor()
+
+    c.execute("""
+        INSERT INTO reservations (day, time, people, age_group, antipasto, table_number, name, phone)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            session['day'],
-            session['time'],
-            session['people'],
-            session['age_group'],
-            session['antipasto'],
-            session['area'],
-            session['water'],
-            session['table_number']
-        ))
-        conn.commit()
-        conn.close()
+    """, (day, time, people, age_group, antipasto, table_number, name, phone))
 
-        return render_template('prenotazione_completata.html')
-    return render_template('prenota_step5.html')
+    conn.commit()
+    conn.close()
 
-# -----------------------------
-# LOGOUT
-# -----------------------------
-@app.route('/logout')
-def logout():
-    session.pop('admin', None)
-    return redirect(url_for('index'))
+    return render_template("prenotazione_completata.html")
 
-# -----------------------------
-# AVVIO
-# -----------------------------
-if __name__ == '__main__':
-    init_db()
-    app.run(debug=True, host="127.0.0.1")
+# ---------------------------
+# RUN
+# ---------------------------
+if __name__ == "__main__":
+    app.run(debug=True)
